@@ -1,12 +1,15 @@
 import { FastifyReply, FastifyRequest } from "fastify";
-import { eq } from "drizzle-orm";
 import { db } from "../Config/db";
 import { logger } from "../Utils/logger";
 import { locations } from "../Models/location.model";
-import { CreateLocationInput, LocationIdInput, UpdateLocationInput } from "../Schemas/location.schema";
+import { eq } from "drizzle-orm";
 
 export const createLocation = async (request: FastifyRequest, reply: FastifyReply) => {
-  const { name, description } = request.body as CreateLocationInput;
+  const { name, description }: { name: string; description: string | null } = request.body as {
+    name: string;
+    description: string | null;
+  };
+
   logger.info(`Creating location with name: ${name}`);
 
   try {
@@ -22,17 +25,16 @@ export const createLocation = async (request: FastifyRequest, reply: FastifyRepl
 export const getAllLocations = async (request: FastifyRequest, reply: FastifyReply) => {
   try {
     const allLocations = await db.select().from(locations);
-    console.log(allLocations);
     reply.send(allLocations);
   } catch (error) {
-    console.log(error);
     logger.error(`Error fetching locations: ${error instanceof Error ? error.message : "Unknown error"}`);
     reply.status(500).send({ error: "Failed to fetch locations" });
   }
 };
 
 export const getLocationById = async (request: FastifyRequest, reply: FastifyReply) => {
-  const { id } = request.params as LocationIdInput;
+  const { id }: { id: number } = request.params as { id: number };
+
   try {
     const location = await db.select().from(locations).where(eq(locations.id, id));
 
@@ -48,8 +50,11 @@ export const getLocationById = async (request: FastifyRequest, reply: FastifyRep
 };
 
 export const updateLocationById = async (request: FastifyRequest, reply: FastifyReply) => {
-  const { id } = request.params as LocationIdInput;
-  const { name, description } = request.body as UpdateLocationInput;
+  const { id }: { id: number } = request.params as { id: number };
+  const { name, description }: { name?: string; description?: string | null } = request.body as {
+    name?: string;
+    description?: string | null;
+  };
 
   try {
     const updatedLocation = await db
@@ -70,7 +75,7 @@ export const updateLocationById = async (request: FastifyRequest, reply: Fastify
 };
 
 export const deleteLocationById = async (request: FastifyRequest, reply: FastifyReply) => {
-  const { id } = request.params as LocationIdInput;
+  const { id }: { id: number } = request.params as { id: number };
 
   try {
     const deletedLocation = await db.delete(locations).where(eq(locations.id, id)).returning();

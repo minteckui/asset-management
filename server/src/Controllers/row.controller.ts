@@ -3,10 +3,12 @@ import { db } from "../Config/db";
 import { logger } from "../Utils/logger";
 import { rows } from "../Models/row.model";
 import { eq } from "drizzle-orm";
-import { CreateRowInput, RowIdInput, UpdateRowInput } from "../Schemas/row.schema";
 
 export const createRow = async (request: FastifyRequest, reply: FastifyReply) => {
-  const { name, description } = request.body as CreateRowInput;
+  const { name, description }: { name: string; description: string } = request.body as {
+    name: string;
+    description: string;
+  };
 
   try {
     const createRow = await db
@@ -46,7 +48,7 @@ export const getAllRows = async (request: FastifyRequest, reply: FastifyReply) =
 };
 
 export const getRowById = async (request: FastifyRequest, reply: FastifyReply) => {
-  const { id } = request.params as RowIdInput;
+  const { id } = request.params as { id: number };
 
   try {
     const row = await db.select().from(rows).where(eq(rows.id, id));
@@ -68,8 +70,11 @@ export const getRowById = async (request: FastifyRequest, reply: FastifyReply) =
 };
 
 export const updateRowById = async (request: FastifyRequest, reply: FastifyReply) => {
-  const { id } = request.params as RowIdInput;
-  const { name, description } = request.body as UpdateRowInput;
+  const { id } = request.params as { id: number };
+  const { name, description }: { name: string; description: string } = request.body as {
+    name: string;
+    description: string;
+  };
 
   try {
     const updatedRow = await db
@@ -98,7 +103,7 @@ export const updateRowById = async (request: FastifyRequest, reply: FastifyReply
 };
 
 export const deleteRowById = async (request: FastifyRequest, reply: FastifyReply) => {
-  const { id } = request.params as RowIdInput;
+  const { id } = request.params as { id: number };
 
   try {
     const deletedRow = await db.delete(rows).where(eq(rows.id, id)).returning();
@@ -107,7 +112,7 @@ export const deleteRowById = async (request: FastifyRequest, reply: FastifyReply
       return reply.status(404).send({ error: "Row not found" });
     }
 
-    reply.status(204).send();
+    reply.status(204).send(); // No content, successful deletion
   } catch (error) {
     if (error instanceof Error) {
       logger.error(`Error deleting row with ID ${id}: ${error.message}`);

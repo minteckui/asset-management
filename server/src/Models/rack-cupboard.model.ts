@@ -1,8 +1,8 @@
-import { integer, pgEnum, pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
+import { integer, pgEnum, pgTable, serial, varchar } from "drizzle-orm/pg-core";
 import { rows } from "./row.model";
 
-export const rackOrCupboardEnum = pgEnum("rack_or_cupboard_type", ["Rack", "Cupboard"]);
-export type RackOrCupboardType = keyof typeof rackOrCupboardEnum.enumValues;
+const rackOrCupboardType = pgEnum("rack_or_cupboard_type", ["Rack", "Cupboard"]);
+export type RackOrCupboardType = keyof typeof rackOrCupboardType.enumValues;
 
 export const racksAndCupboards = pgTable("racks_and_cupboards", {
   id: serial("id").primaryKey(),
@@ -10,9 +10,7 @@ export const racksAndCupboards = pgTable("racks_and_cupboards", {
   rowId: integer("row_id")
     .notNull()
     .references(() => rows.id),
-  type: rackOrCupboardEnum().default("Cupboard"),
+  type: rackOrCupboardType("type").notNull(),
   name: varchar("name", { length: 50 }).notNull(),
   description: varchar("description", { length: 255 }),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
